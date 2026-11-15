@@ -29,6 +29,7 @@ jobs:
         shell: powershell
         run: |
           .\companion\Build.ps1
+          .\companion\Test-Tray.ps1
           node scripts/release-check.mjs --package
   gateway-audit:
     runs-on: ubuntu-latest
