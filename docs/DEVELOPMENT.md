@@ -25,6 +25,7 @@ Local Wrangler listens only on 127.0.0.1:8787 with route-origin inference disabl
 ```powershell
 .\companion\Build.ps1
 .\companion\Test-Tray.ps1
+.\companion\Install.ps1
 ```
 
 Build output goes to ignored dist/. The executable is compiled from GatewayCompanion.cs and is not checked into Git. Build.ps1 creates a ZIP and checksum from an explicit file list. Before npm publication, inspect the exact package with the release checks described in RELEASING.md.
