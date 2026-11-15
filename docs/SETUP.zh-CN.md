@@ -8,7 +8,7 @@
 npx @zakir300408/wechat-companion@latest setup
 ```
 
-npm 当前提供 0.5.0，使用应用窗口。下文介绍的是新版托盘程序 0.6.0-preview.2；在发布前，需要按[源码运行说明](DEVELOPMENT.md)安装。
+托盘模式需要 0.6.0-preview.2 或更新版本。该版本已提交到 npm，目前仍在处理中；latest 暂时安装 0.5.0。等待期间可[从源码运行](DEVELOPMENT.md)托盘版本。
 
 ## 首次运行
 

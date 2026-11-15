@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0-preview.2 — unreleased
+## 0.6.0-preview.2 — submitted 2026-11-16 (npm processing)
 
 - Run in the system tray, with a connection page at setup and quiet startup afterward.
 - Start with Windows by default; keep the user's startup choice on updates.

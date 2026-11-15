@@ -18,7 +18,7 @@ Follow the local WeChat setup if asked. On the connection page, click **Copy pri
 
 Keep that link private: it gives access to your chats while the bridge is connected.
 
-> npm currently has **0.5.0**, which opens a companion window. The tray version below is in **0.6.0-preview.2**, available from [source](docs/DEVELOPMENT.md). It has not been published to npm yet.
+> The tray update, **0.6.0-preview.2**, has been submitted to npm and is still processing. `latest` currently installs **0.5.0**, which uses an app window. You can use the tray version from [source](docs/DEVELOPMENT.md) while it is pending.
 
 ## After setup
 

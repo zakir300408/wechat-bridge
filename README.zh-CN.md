@@ -18,7 +18,7 @@ npx @zakir300408/wechat-companion@latest setup
 
 请保管好这个链接。桥接程序连接期间，持有链接的人可以读取你的聊天记录。
 
-> npm 目前发布的是 **0.5.0**，会显示一个应用窗口。下方介绍的托盘版本是 **0.6.0-preview.2**，目前可[从源码运行](docs/DEVELOPMENT.md)，尚未发布到 npm。
+> 托盘版本 **0.6.0-preview.2** 已提交到 npm，目前仍在处理中。`latest` 暂时安装的是 **0.5.0**，会显示应用窗口。等待期间可[从源码运行](docs/DEVELOPMENT.md)托盘版本。
 
 ## 安装之后
 

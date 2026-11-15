@@ -8,7 +8,7 @@ Use the Windows PC that holds your WeChat history. Install Node.js 22.13 or newe
 npx @zakir300408/wechat-companion@latest setup
 ```
 
-npm currently provides 0.5.0, which uses an app window. The steps below describe the new tray version, 0.6.0-preview.2. Until it is published, follow [Build from source](DEVELOPMENT.md) to use it.
+Tray mode requires 0.6.0-preview.2 or newer. That release has been submitted to npm and is still processing; latest currently installs 0.5.0. You can [build from source](DEVELOPMENT.md) to use tray mode while it is pending.
 
 ## First run
 
