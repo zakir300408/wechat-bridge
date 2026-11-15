@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">WeChat Bridge: your local history, connected to your AI chat</title>
+  <desc id="desc">A Windows PC sends requested messages, pictures and documents through a private connection to a chat assistant. Read only. Your keys stay on your PC.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#102f2b"/><stop offset="1" stop-color="#142638"/></linearGradient>
+    <linearGradient id="accent" x2="1" y2="1"><stop stop-color="#78e7bd"/><stop offset="1" stop-color="#4fc3d8"/></linearGradient>
+  </defs>
+  <rect width="1200" height="430" rx="28" fill="url(#bg)"/>
+  <circle cx="1110" cy="24" r="190" fill="#fff" opacity=".025"/>
+  <text x="56" y="68" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#f3faf8">WeChat Bridge</text>
+  <text x="56" y="103" font-family="Arial,sans-serif" font-size="18" fill="#a9c6c1">Your local WeChat history. In your AI chat.</text>
+  <g transform="translate(56 144)">
+    <rect width="322" height="190" rx="18" fill="#f5faf8"/>
+    <rect x="30" y="28" width="144" height="100" rx="8" fill="#dcece8" stroke="#8daea5" stroke-width="2"/>
+    <path d="M94 128v18m-25 0h50" stroke="#60887e" stroke-width="6" stroke-linecap="round"/>
+    <rect x="48" y="43" width="108" height="15" rx="5" fill="#3ba580"/>
+    <rect x="48" y="69" width="80" height="8" rx="4" fill="#a7c6bc"/>
+    <rect x="48" y="85" width="96" height="8" rx="4" fill="#a7c6bc"/>
+    <rect x="48" y="101" width="66" height="8" rx="4" fill="#a7c6bc"/>
+    <g transform="translate(205 41)" fill="none" stroke="#369b7d" stroke-width="3" stroke-linejoin="round"><path d="M0 4h63v41H28L14 56V45H0z"/><path d="M12 17h38M12 29h25" stroke-linecap="round"/></g>
+    <text x="30" y="173" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#24443d">Your Windows PC</text>
+  </g>
+  <g transform="translate(423 178)">
+    <path d="M0 35h61m118 0h61" stroke="#6bb8ab" stroke-width="3" stroke-dasharray="5 6"/>
+    <rect x="61" width="118" height="78" rx="18" fill="url(#accent)"/>
+    <rect x="101" y="29" width="37" height="30" rx="6" fill="none" stroke="#163b33" stroke-width="3"/>
+    <path d="M108 29v-8a11 11 0 0 1 23 0v8" fill="none" stroke="#163b33" stroke-width="3"/>
+    <text x="120" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#d8ede6">Private link</text>
+  </g>
+  <g transform="translate(718 144)">
+    <rect width="426" height="190" rx="18" fill="#f5faf8"/>
+    <circle cx="40" cy="41" r="13" fill="#54bca0"/>
+    <rect x="65" y="30" width="167" height="9" rx="4" fill="#728f87"/>
+    <rect x="65" y="47" width="120" height="7" rx="3" fill="#b4cac3"/>
+    <rect x="27" y="77" width="372" height="55" rx="10" fill="#e3efeb"/>
+    <text x="43" y="110" font-family="Arial,sans-serif" font-size="17" fill="#355a4e">“Show my recent chat and its files.”</text>
+    <text x="30" y="173" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#24443d">ChatGPT or another MCP client</text>
+  </g>
+  <text x="56" y="390" font-family="Arial,sans-serif" font-size="16" fill="#c4dbd4">Messages · Picture previews · Documents</text>
+  <text x="1144" y="390" text-anchor="end" font-family="Arial,sans-serif" font-size="16" fill="#8fe0bc">Read only. Local keys stay local.</text>
+</svg>

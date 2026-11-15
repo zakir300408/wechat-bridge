@@ -1,0 +1,17 @@
+{
+  "name": "wechat-companion-project",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node --test companion/contact-resolution.test.mjs companion/attachments.test.mjs gateway/test.mjs scripts/release-check.test.mjs",
+    "check": "node scripts/release-check.mjs && npm run test && npm run format:check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "3.10.1"
+  }
+}

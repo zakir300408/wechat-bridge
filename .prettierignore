@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.wrangler
+*.cs
+*.ps1
+*.cmd
+*.py
+*.txt
+gateway/wrangler.local.jsonc
+gateway/wrangler.production.jsonc
+

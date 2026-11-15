@@ -1,0 +1,10 @@
+{
+  "name": "wechat-companion-backend",
+  "version": "0.6.0",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "weflow-cli": "1.21.15",
+    "ws": "8.23.0"
+  }
+}

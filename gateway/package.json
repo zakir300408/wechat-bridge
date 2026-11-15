@@ -1,0 +1,13 @@
+{
+  "name": "wechat-companion-gateway",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --ip 127.0.0.1 --port 8787 --infer-origin-from-routes=false",
+    "test": "node --test test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.162.0"
+  }
+}

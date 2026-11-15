@@ -1,0 +1,47 @@
+{
+  "name": "@zakir300408/wechat-companion",
+  "version": "0.6.0-preview.1",
+  "private": false,
+  "description": "One-command installer for the private Windows WeChat Companion preview",
+  "bin": {
+    "wechat-companion": "cli.cjs"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "files": [
+    "cli.cjs",
+    "Companion.exe",
+    "Install.ps1",
+    "server.mjs",
+    "extract.py",
+    "requirements.txt",
+    "README.md",
+    "connector.mjs",
+    "credentials.ps1",
+    "consent.ps1",
+    "contacts.py",
+    "contact-resolution.mjs",
+    "attachments.mjs",
+    "media.py",
+    "backend/package.json",
+    "backend/package-lock.json",
+    "requirements-backend.txt",
+    "LICENSE",
+    "image_quality.py"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zakir300408/wechat-bridge.git",
+    "directory": "companion"
+  },
+  "homepage": "https://github.com/zakir300408/wechat-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/zakir300408/wechat-bridge/issues"
+  }
+}
