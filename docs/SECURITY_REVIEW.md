@@ -12,6 +12,8 @@ Date: 2026-11-16. Scope: this repository's gateway, local connector, attachment 
 
 ## Dependency review
 
+Follow-up: GitHub scanning found Python advisories that the initial npm-only review missed, including high-severity PDF parsing issues in pypdf 6.4.0. The tray preview updates pypdf to 6.21.4; synthetic PDF text extraction passes. pip-audit 2.10.1 reports no known vulnerabilities in the explicitly pinned Python requirements. This check uses --no-deps and does not audit unpinned transitive packages. CI now runs this check alongside the Node audits.
+
 The gateway development dependency scan reported no known advisories at review time. The locked reader tree reported six affected packages: five moderate and one low, with no high or critical findings. A compatible `npm audit fix --package-lock-only` was attempted; remaining reports involve `uuid` through `exceljs` and `katex` through `mermaid` / `@wenyan-md/core` / `weflow-cli`.
 
 The exposed reader uses the chat database service and Python extraction; it does not expose the upstream HTML/Mermaid/KaTeX renderer or ExcelJS spreadsheet-writing commands. This reduces the known paths' exposure but is **not proof that the whole dependency is safe**. Do not force a breaking dependency override merely to silence an audit. Review upstream fixes and run compatibility tests before updating the reader. Re-run the scans for each release; these counts are a dated snapshot.

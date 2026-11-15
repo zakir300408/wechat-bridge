@@ -6,6 +6,7 @@
 - Start with Windows by default; keep the user's startup choice on updates.
 - Reuse one running instance, stop the owned reader on quit, and retry failed connections.
 - Add link and stop commands, shorter English docs, and Chinese setup guides.
+- Update pypdf to 6.21.4 for reported PDF parsing vulnerabilities; add Python requirement audits and a PDF extraction test.
 
 ## 0.6.0-preview.1 — unreleased
 
