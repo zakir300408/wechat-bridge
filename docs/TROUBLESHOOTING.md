@@ -6,11 +6,11 @@ For pixelated pictures, check `source_width`, `source_height` and `quality`. If 
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | Node or npx is missing                              | Install Node.js 22.13+ from the official Node site, then reopen PowerShell                                      |
 | PowerShell blocks installation                      | Use your administrator-approved environment; do not blindly disable policy                                      |
-| Setup cannot replace the executable                 | Close the companion before updating; keep WeChat open                                                           |
-| Local source unavailable                            | Run Check; complete Initialize WeChat locally if needed                                                         |
+| Setup cannot replace the executable                 | Run setup again; it stops the bridge before updating. Keep WeChat open                                          |
+| Local source unavailable                            | Right-click the tray icon: Check WeChat or Set up WeChat                                                        |
 | Contact not found                                   | Search a saved remark, nickname or WeChat ID; a failed lookup is not proof of no history                        |
 | Several people match                                | Select a returned candidate; do not merge them or guess                                                         |
-| Private link returns unauthorized                   | Copy the current link from the companion; a reset invalidates the old one                                       |
+| Private link returns unauthorized                   | Double-click the tray icon and copy the current link; a reset invalidates the old one                           |
 | PC offline                                          | Wake the source PC and start the companion; reconnect automatically resumes network interruptions               |
 | OAuth or invalid browser form error in normal setup | Use the current private link with No authentication; the public `/d/.../mcp` address is the optional OAuth path |
 | Picture placeholder only                            | Retrieve its attachment handle; local image bytes may be missing or undecryptable                               |

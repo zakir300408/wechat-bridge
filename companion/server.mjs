@@ -166,7 +166,7 @@ async function run(name, a) {
       ],
       voice_transcription: 'not_configured',
       history_scope: 'local account only',
-      version: '0.6.0-preview.1',
+      version: '0.6.0-preview.2',
     };
   }
   if (name === 'list_conversations') {
@@ -276,7 +276,7 @@ if (process.argv.includes('--check')) {
   process.exit();
 }
 const server = new Server(
-  { name: 'wechat-companion', version: '0.6.0-preview.1' },
+  { name: 'wechat-companion', version: '0.6.0-preview.2' },
   { capabilities: { tools: {} } },
 );
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));

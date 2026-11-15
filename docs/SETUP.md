@@ -1,39 +1,51 @@
-# Install and connect
+# Setup
 
-## Before you begin
+[中文](SETUP.zh-CN.md)
 
-Use a Windows PC that already holds your WeChat account and local history. A browser-only device cannot supply another computer's local history. Install Node.js 22.13 or later from nodejs.org, then open a normal PowerShell window. Administrator privileges are not normally required. Respect any organization-managed software policy.
-
-## Install
+Use the Windows PC that holds your WeChat history. Install Node.js 22.13 or newer, then open PowerShell:
 
 ```powershell
 npx @zakir300408/wechat-companion@latest setup
 ```
 
-The installer prepares a user-local companion, a locked Node reader dependency tree, Python environments, and a desktop shortcut. npm lifecycle scripts are disabled for reader installation. It does not install an OpenAI tunnel or enable a paid model service.
+npm currently provides 0.5.0, which uses an app window. The steps below describe the new tray version, 0.6.0-preview.2. Until it is published, follow [Build from source](DEVELOPMENT.md) to use it.
 
-If local WeChat access is not initialized, choose Initialize WeChat and follow the local WeFlow window. Login/key acquisition requires your interaction. Never paste a password, database key, runtime credential or private MCP link into a setup chat. Do not weaken PowerShell execution policy to make an unknown installer run; use an administrator-approved environment.
+## First run
 
-## Connect ChatGPT
+The installer starts WeChat Bridge. If WeChat access needs setting up, a local setup window opens. Follow it and complete your WeChat login there.
 
-The companion opens a connection page. Copy the **private link** there. It contains a credential, so paste it only into the intended connector configuration.
+The connection page opens in your browser when the bridge connects. Click **Copy private link**, add it to your chat app as a custom MCP server, and choose **No authentication**. No separate OAuth key is needed. Your chat account must support custom MCP servers.
 
-Where available in your ChatGPT account/workspace: Plugins → add a custom MCP server → paste the private link → choose **No authentication**. No separate OAuth key, client secret, OpenAI tunnel or Allow prompt is needed in private-link mode. Account and workspace permissions still apply; the project cannot unlock features your account does not offer.
+Keep the link private. Paste it into the server settings, not into a chat or GitHub issue.
 
-Select the resulting connector in a chat and try: “Check the companion status,” then “Find the conversation with [a saved contact name].” Read messages only for an explicit date range. If ChatGPT still sees an earlier tool description, refresh its connector tools using the controls available in your account.
+Try asking: “Check the bridge status,” then “Find my chat with [contact name].”
 
 ## Everyday use
 
+The bridge runs in the system tray and starts when you sign in to Windows. It does not open the browser on each login. Double-click its tray icon to open the connection page again.
+
+Right-click the icon for:
+
+- **Disconnect**: stop remote reads. **Connect** resumes them.
+- **Reset private link**: replace your link. Update the saved link in your chat app afterward.
+- **Start with Windows**: turn automatic startup on or off. Updates keep this choice.
+- **Check WeChat** / **Set up WeChat**: check or repair local access.
+- **Quit**: close the bridge and stop its background reader. It can start again at your next login unless you turn off startup.
+
+You can also use PowerShell:
+
 ```powershell
 npx @zakir300408/wechat-companion@latest start
-npx @zakir300408/wechat-companion@latest check
-npx @zakir300408/wechat-companion@latest doctor
+npx @zakir300408/wechat-companion@latest link
+npx @zakir300408/wechat-companion@latest stop
 ```
 
-The source PC must remain awake and online. Startup at Windows login is optional. Disconnect or close the companion to stop reads. **Reset private link** replaces the link and invalidates previous private links, OAuth grants and temporary media links. Update the connector configuration after a reset.
+The `link` and `stop` commands require the new tray version. `start` runs quietly and does not open a browser.
 
-For a different source PC, run setup there and use its separate link. Do not share an agent identity, copy DPAPI profiles, or point multiple source PCs at one identity.
+Keep the source PC awake and online. To read another PC's history, install there separately and use that PC's link. Do not copy pairing files between PCs.
 
-## Safe verification
+## Updating
 
-Check status first. Search for a known contact next. Read a small date-bounded page, then test one image or document if desired. A setup assistant should not request a full account export to verify installation.
+Run setup again. It stops the installed bridge, updates its files, and starts it again. Your pairing and Windows startup choice are kept. WeChat itself stays running.
+
+For help, see [Troubleshooting](TROUBLESHOOTING.md). Never share database keys, pairing files, or your private link.

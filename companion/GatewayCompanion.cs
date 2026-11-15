@@ -1,49 +1,205 @@
 using System;
 using System.IO;
 using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Web.Script.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-class GatewayCompanion : Form {
- readonly string dir=AppDomain.CurrentDomain.BaseDirectory;
- readonly TextBox status=new TextBox(),gateway=new TextBox();
- readonly CheckBox startup=new CheckBox();
- Process running; Dictionary<string,object> cfg;
- const string DefaultGateway="https://wechat.clonemeup.com";
- string Settings { get {return Path.Combine(dir,"settings.json");} }
- static string Q(string s){return "\""+s.Replace("\"","\\\"")+"\"";}
- void LabelAt(string text,int y){Controls.Add(new Label{Text=text,Left=20,Top=y,Width=650,Height=40});}
- void ButtonAt(string label,int x,int y,Action action){var b=new Button{Text=label,Left=x,Top=y,Width=200,Height=34};b.Click+=(s,e)=>{try{action();}catch{status.Text="Action failed. Check local setup and permissions. No credentials logged.";}};Controls.Add(b);}
- ProcessStartInfo Info(string exe,string args,bool visible){var p=new ProcessStartInfo(exe,args){WorkingDirectory=dir,UseShellExecute=false,CreateNoWindow=!visible};p.EnvironmentVariables["WECHAT_COMPANION_SETTINGS"]=Settings;return p;}
- async void Check(){status.Text="Checking local WeChat access...";try{var p=Info((string)cfg["node"],Q(Path.Combine(dir,"server.mjs"))+" --check",false);p.RedirectStandardOutput=true;p.RedirectStandardError=true;using(var proc=Process.Start(p)){var output=proc.StandardOutput.ReadToEndAsync();var error=proc.StandardError.ReadToEndAsync();await Task.WhenAll(output,error);await Task.Run(()=>proc.WaitForExit());status.Text=proc.ExitCode==0?"Local WeChat access works. Click Connect to enable your private connection.":"WeChat access unavailable. Click Initialize WeChat, follow the setup window, then Check again.";}}catch{status.Text="Check failed. Rerun setup to repair dependencies.";}}
- void Connect(){
-  if(running!=null&&!running.HasExited){status.Text="Connector is already running. Your private page opened when it started.";return;}
-  Uri u;if(!Uri.TryCreate(gateway.Text,UriKind.Absolute,out u)||u.Scheme!="https"||u.AbsolutePath!="/"||u.UserInfo!=""||u.Query!=""||u.Fragment!=""){status.Text="Enter the HTTPS gateway origin supplied by your administrator.";return;}
-  File.WriteAllText(Path.Combine(dir,"gateway-preferences.json"),new JavaScriptSerializer().Serialize(new{gateway=u.GetLeftPart(UriPartial.Authority)}));
-  var p=Info((string)cfg["node"],Q(Path.Combine(dir,"connector.mjs"))+" "+Q(u.GetLeftPart(UriPartial.Authority)),false);p.RedirectStandardInput=true;p.RedirectStandardOutput=true;p.RedirectStandardError=true;
-  running=Process.Start(p);status.Text="Starting private connector...";
-  running.OutputDataReceived+=(s,e)=>{if(e.Data!=null&&!IsDisposed)BeginInvoke((Action)(()=>{status.AppendText("\r\n"+e.Data);}));};
-  running.ErrorDataReceived+=(s,e)=>{if(e.Data!=null&&!IsDisposed)BeginInvoke((Action)(()=>{status.AppendText("\r\n"+e.Data);}));};running.BeginOutputReadLine();running.BeginErrorReadLine();
+using System.Security.Cryptography;
+using System.Text;
+
+// The tray owns the connector process. No window is needed for everyday use.
+class GatewayCompanion : ApplicationContext {
+ readonly string dir = AppDomain.CurrentDomain.BaseDirectory;
+ readonly NotifyIcon tray = new NotifyIcon();
+ readonly Control dispatcher = new Control();
+ readonly System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+ readonly ToolStripMenuItem state = new ToolStripMenuItem("Starting...");
+ readonly ToolStripMenuItem startup = new ToolStripMenuItem("Start with Windows");
+ readonly EventWaitHandle pageEvent, quitEvent;
+ readonly Dictionary<string,object> cfg;
+ readonly HashSet<Process> helpers = new HashSet<Process>();
+ Process running;
+ bool closing, wanted = true, connected, pagePending, initializing;
+ DateTime retryAt = DateTime.MinValue;
+ string gateway = "https://wechat.clonemeup.com";
+ string StartupFile { get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "WeChatBridge.lnk"); } }
+
+ static string Q(string s) { return "\"" + s.Replace("\"", "\\\"") + "\""; }
+ ProcessStartInfo Info(string args, bool visible) {
+  var p = new ProcessStartInfo((string)cfg["node"], args) { WorkingDirectory = dir, UseShellExecute = false, CreateNoWindow = !visible };
+  p.EnvironmentVariables["WECHAT_COMPANION_SETTINGS"] = Path.Combine(dir, "settings.json");
+  p.EnvironmentVariables["COMPANION_NO_BROWSER"] = "1";
+  p.EnvironmentVariables["COMPANION_QUIET"] = "1";
+  return p;
  }
- void Disconnect(){if(running!=null&&!running.HasExited){try{running.StandardInput.WriteLine("stop");running.StandardInput.Flush();if(!running.WaitForExit(5000)){var kill=Info("taskkill.exe","/PID "+running.Id+" /T /F",false);using(var p=Process.Start(kill)){p.WaitForExit(5000);}}}catch{}running.Dispose();running=null;}status.Text="Disconnected. This PC cannot serve reads until you connect again.";}
- public GatewayCompanion(){
-  Text="WeChat Bridge — private read-only access";Width=740;Height=570;FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;
-  cfg=new JavaScriptSerializer().Deserialize<Dictionary<string,object>>(File.ReadAllText(Settings));
-  LabelAt("1. Check WeChat access on this computer",20);ButtonAt("Check connection",20,52,Check);
-  ButtonAt("Initialize WeChat",240,52,()=>{Process.Start(Info((string)cfg["node"],Q(Path.Combine((string)cfg["weflowRoot"],"cli.cjs"))+" init",true));status.Text="Follow the WeFlow setup window. Initialization may require your WeChat login. Then Check again.";});
-  LabelAt("2. Copy your private connection link into your chat app. Choose No authentication.",112);
-  gateway.SetBounds(20,160,650,26);gateway.Text=DefaultGateway;gateway.Visible=false;Controls.Add(gateway);
-  string preferences=Path.Combine(dir,"gateway-preferences.json");if(File.Exists(preferences)){var saved=new JavaScriptSerializer().Deserialize<Dictionary<string,string>>(File.ReadAllText(preferences));gateway.Text=saved["gateway"];}
-  ButtonAt("Connect",20,205,Connect);ButtonAt("Disconnect",240,205,Disconnect);
-  ButtonAt("Connection settings",460,205,()=>{gateway.Visible=!gateway.Visible;});
-  LabelAt("Your private link is the credential. Anyone with it can read while this PC is connected. Keep it private; reset it below if you need a replacement.",255);
-  ButtonAt("Reset private link",20,305,()=>{if(running==null||running.HasExited){status.Text="Connect first, then reset the private link.";return;}running.StandardInput.WriteLine("reset-link");running.StandardInput.Flush();status.Text="Replacing your private link. The updated connection page will open automatically.";});
-  startup.Text="Connect automatically at Windows login";startup.SetBounds(240,310,440,26);Controls.Add(startup);
-  string command=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup),"WeChatCompanion.cmd");startup.Checked=File.Exists(command);startup.CheckedChanged+=(s,e)=>{if(startup.Checked)File.WriteAllText(command,"@start \"\" "+Q(Application.ExecutablePath)+" --connect");else if(File.Exists(command))File.Delete(command);};
-  status.SetBounds(20,355,680,145);status.Multiline=true;status.ReadOnly=true;status.ScrollBars=ScrollBars.Vertical;status.Text="Read-only. Requested messages and attachments pass through your gateway to the authorized client. Local credentials stay on this PC.";Controls.Add(status);
-  FormClosing+=(s,e)=>Disconnect();
-  Shown+=(s,e)=>Connect();
+ void OnUI(Action action) {
+  if (closing) return;
+  try { dispatcher.BeginInvoke((Action)(() => { if (!closing) action(); })); } catch (InvalidOperationException) { }
  }
- [STAThread]static void Main(){Application.EnableVisualStyles();try{Application.Run(new GatewayCompanion());}catch{MessageBox.Show("Run the companion setup command first to prepare this computer.");}}
+ void Status(string text) { state.Text = text; tray.Text = "WeChat Bridge — " + text; }
+ void Notify(string text) { tray.ShowBalloonTip(6000, "WeChat Bridge", text, ToolTipIcon.Info); }
+ void Send(string command) {
+  try { if (running != null && !running.HasExited) { running.StandardInput.WriteLine(command); running.StandardInput.Flush(); } }
+  catch (InvalidOperationException) { connected = false; }
+  catch (IOException) { connected = false; }
+ }
+ void OpenPage() {
+  pagePending = true;
+  if (connected) { pagePending = false; Send("open-page"); }
+  else { wanted = true; Connect(); }
+ }
+ void Connect() {
+  if (closing || initializing || (running != null && !running.HasExited)) return;
+  if (running != null) { running.Dispose(); running = null; }
+  wanted = true; connected = false; Status("Connecting");
+  try {
+   var p = Info(Q(Path.Combine(dir, "connector.mjs")) + " " + Q(gateway), false);
+   p.RedirectStandardInput = p.RedirectStandardOutput = p.RedirectStandardError = true;
+   var child = new Process { StartInfo = p, EnableRaisingEvents = true };
+   child.OutputDataReceived += (s,e) => { if (e.Data != null) OnUI(() => {
+    if (running != child) return;
+    if (e.Data.StartsWith("Connected.")) {
+     connected = true; Status("Connected");
+     if (pagePending) { pagePending = false; Send("open-page"); }
+    } else if (e.Data.StartsWith("Connection interrupted")) { connected = false; Status("Reconnecting"); }
+   }); };
+   // Keep backend diagnostics out of notifications and files.
+   child.ErrorDataReceived += (s,e) => { };
+   child.Exited += (s,e) => OnUI(() => {
+    if (running != child) return;
+    connected = false; retryAt = DateTime.UtcNow.AddSeconds(30);
+    Status(wanted ? "Offline — retrying" : "Disconnected");
+   });
+   running = child; child.Start(); child.BeginOutputReadLine(); child.BeginErrorReadLine();
+  } catch {
+   if (running != null) { running.Dispose(); running = null; }
+   retryAt = DateTime.UtcNow.AddSeconds(30); Status("Offline — retrying");
+  }
+ }
+ void Disconnect() {
+  connected = false;
+  if (running != null) {
+   var child = running;
+   try {
+    if (!child.HasExited) {
+     Send("stop");
+     if (!child.WaitForExit(5000)) {
+      using (var kill = Process.Start(new ProcessStartInfo("taskkill.exe", "/PID " + child.Id + " /T /F") { UseShellExecute = false, CreateNoWindow = true })) { kill.WaitForExit(5000); }
+     }
+    }
+   } catch (InvalidOperationException) { } catch (IOException) { }
+   running = null; child.Dispose();
+  }
+  if (!closing) Status("Disconnected");
+ }
+ async Task<bool> CheckLocal() {
+  try {
+   var info = Info(Q(Path.Combine(dir, "server.mjs")) + " --check", false);
+   info.RedirectStandardOutput = info.RedirectStandardError = true;
+   using (var child = Process.Start(info)) {
+    helpers.Add(child);
+    try {
+    var output = child.StandardOutput.ReadToEndAsync(); var errors = child.StandardError.ReadToEndAsync();
+    if (!await Task.Run(() => child.WaitForExit(60000))) { child.Kill(); return false; }
+    await Task.WhenAll(output, errors);
+    return child.ExitCode == 0;
+    } finally { helpers.Remove(child); }
+   }
+  } catch { return false; }
+ }
+ async void Initialize() {
+  if (initializing || closing) return;
+  initializing = true; Disconnect(); Status("WeChat setup");
+  try {
+   using (var child = Process.Start(Info(Q(Path.Combine((string)cfg["weflowRoot"], "cli.cjs")) + " init", true))) {
+    helpers.Add(child);
+    try { await Task.Run(() => child.WaitForExit()); } finally { helpers.Remove(child); }
+   }
+   if (!closing && !await CheckLocal()) Notify("WeChat setup is incomplete. Right-click the tray icon and choose Set up WeChat to try again.");
+  } catch { if (!closing) Notify("Could not open WeChat setup. Run the setup command again."); }
+  finally { initializing = false; if (!closing && wanted) Connect(); }
+ }
+ async void FirstSetup() {
+  bool ready = await CheckLocal();
+  initializing = false;
+  if (ready) { if (!closing) Connect(); }
+  else if (!closing) { Notify("Follow the WeChat setup window. Your connection page will open when setup is complete."); Initialize(); }
+ }
+ void SetStartup(bool enable) {
+  try {
+   if (enable) {
+    // A shortcut avoids cmd.exe expansion of unusual user-profile characters.
+    var type = Type.GetTypeFromProgID("WScript.Shell");
+    dynamic shell = Activator.CreateInstance(type);
+    dynamic shortcut = shell.CreateShortcut(StartupFile);
+    shortcut.TargetPath = Application.ExecutablePath; shortcut.Arguments = "--background"; shortcut.WorkingDirectory = dir; shortcut.Save();
+   } else if (File.Exists(StartupFile)) File.Delete(StartupFile);
+   startup.Checked = File.Exists(StartupFile);
+   File.WriteAllText(Path.Combine(dir, "startup-preference.json"), new JavaScriptSerializer().Serialize(new { enabled = startup.Checked }));
+  } catch { Notify("Could not change Windows startup settings."); }
+ }
+ ToolStripMenuItem Item(string label, Action action) {
+  var item = new ToolStripMenuItem(label);
+  item.Click += (s,e) => { try { action(); } catch { Notify("That action failed. Try again or run setup to repair the installation."); } };
+  return item;
+ }
+ public GatewayCompanion(bool setup, EventWaitHandle page, EventWaitHandle quit) {
+  pageEvent = page; quitEvent = quit; pagePending = setup;
+  cfg = new JavaScriptSerializer().Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(dir,"settings.json")));
+  string preferences = Path.Combine(dir,"gateway-preferences.json");
+  if (File.Exists(preferences)) {
+   var saved = new JavaScriptSerializer().Deserialize<Dictionary<string,string>>(File.ReadAllText(preferences));
+   Uri value;
+   if (!Uri.TryCreate(saved["gateway"], UriKind.Absolute, out value) || value.Scheme != "https" || value.AbsolutePath != "/" || value.UserInfo != "" || value.Query != "" || value.Fragment != "") throw new InvalidDataException();
+   gateway = value.GetLeftPart(UriPartial.Authority);
+  }
+  var handle = dispatcher.Handle;
+  var menu = new ContextMenuStrip(); state.Enabled = false; menu.Items.Add(state); menu.Items.Add(new ToolStripSeparator());
+  menu.Items.Add(Item("Open connection page", OpenPage));
+  menu.Items.Add(Item("Connect", () => { wanted = true; Connect(); }));
+  menu.Items.Add(Item("Disconnect", () => { wanted = false; pagePending = false; Disconnect(); }));
+  menu.Items.Add(Item("Check WeChat", async () => Notify(await CheckLocal() ? "Local WeChat access works." : "WeChat access is unavailable. Choose Set up WeChat from this menu.")));
+  menu.Items.Add(Item("Set up WeChat", () => { wanted = true; Initialize(); }));
+  menu.Items.Add(Item("Reset private link", () => { if (connected) Send("reset-link"); else Notify("Connect before resetting your link."); }));
+  startup.Checked = File.Exists(StartupFile); startup.Click += (s,e) => SetStartup(!startup.Checked); menu.Items.Add(startup);
+  menu.Items.Add(new ToolStripSeparator()); menu.Items.Add(Item("Quit", ExitThread));
+  tray.Icon = SystemIcons.Application; tray.ContextMenuStrip = menu; tray.Text = "WeChat Bridge"; tray.Visible = true;
+  tray.DoubleClick += (s,e) => OpenPage();
+  timer.Interval = 500; timer.Tick += (s,e) => {
+   if (quitEvent.WaitOne(0)) { ExitThread(); return; }
+   if (pageEvent.WaitOne(0)) OpenPage();
+   if (wanted && !initializing && (running == null || running.HasExited) && DateTime.UtcNow >= retryAt) Connect();
+  };
+  if (setup) { initializing = true; Task.Delay(1).ContinueWith(t => OnUI(FirstSetup)); }
+  else Connect();
+  timer.Start();
+ }
+ protected override void ExitThreadCore() {
+  if (closing) return;
+  closing = true; wanted = false; timer.Stop(); Disconnect(); tray.Visible = false;
+  foreach (var child in helpers) {
+   try { if (!child.HasExited) using (var kill = Process.Start(new ProcessStartInfo("taskkill.exe", "/PID " + child.Id + " /T /F") { UseShellExecute = false, CreateNoWindow = true })) { kill.WaitForExit(5000); } }
+   catch (InvalidOperationException) { }
+  }
+  tray.Dispose(); timer.Dispose(); dispatcher.Dispose(); base.ExitThreadCore();
+ }
+ [STAThread] static void Main(string[] args) {
+  Application.EnableVisualStyles();
+  string identity;
+  using (var sha = SHA256.Create()) { identity = BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory.ToUpperInvariant()))).Replace("-", "").Substring(0,24); }
+  string name = "Local\\WeChatBridge-" + identity;
+  bool first;
+  using (var mutex = new Mutex(true, name, out first))
+  using (var page = new EventWaitHandle(false, EventResetMode.AutoReset, name + "-page"))
+  using (var quit = new EventWaitHandle(false, EventResetMode.AutoReset, name + "-quit")) {
+   bool setup = Array.IndexOf(args,"--setup") >= 0, showPage = Array.IndexOf(args,"--page") >= 0, stop = Array.IndexOf(args,"--quit") >= 0;
+   if (!first) { if (stop) quit.Set(); else if (setup || showPage) page.Set(); return; }
+   if (stop) return;
+   try { Application.Run(new GatewayCompanion(setup || showPage, page, quit)); }
+   catch { MessageBox.Show("Run the WeChat Bridge setup command to repair this installation.", "WeChat Bridge"); }
+  }
+ }
 }

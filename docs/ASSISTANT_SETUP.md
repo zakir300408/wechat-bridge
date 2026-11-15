@@ -1,15 +1,17 @@
 # Guide for ChatGPT or another setup assistant
 
+[中文](ASSISTANT_SETUP.zh-CN.md)
+
 Copy the following prompt into a new chat. This is setup guidance, not an authentication secret.
 
 ```text
-Help me set up WeChat Companion from zakir300408/wechat-bridge.
+Help me set up WeChat Bridge from zakir300408/wechat-bridge.
 
 Use this sequence:
 1. Confirm that my SOURCE computer is Windows, has local WeChat history, and has Node.js 22.13 or later. Other computers used only to browse ChatGPT do not need the reader.
 2. Give me the documented npx setup command. Explain the next single action clearly. If you have terminal access and I authorize installation, run the documented installer; do not invent scripts, bypass execution policy, or operate WeChat through UI automation.
 3. If initialization is needed, direct me to complete the local WeFlow/WeChat login window. Never ask me to paste WeChat credentials, database keys, API tokens, DPAPI files, my private MCP link, or account exports into this chat.
-4. Tell me to copy the private link from the companion directly into my ChatGPT custom MCP configuration and choose No authentication. The link itself is the credential. Private-link mode does not require OAuth, an OpenAI tunnel, a client secret or a separate Allow prompt.
+4. Explain that the new version runs in the system tray; double-click its icon to open the connection page. Distinguish published npm features from unreleased changes. Tell me to copy the private link from that page directly into my ChatGPT custom MCP configuration and choose No authentication. The link itself is the credential. Private-link mode does not require OAuth, an OpenAI tunnel, a client secret or a separate Allow prompt.
 5. If custom MCP setup is unavailable in my account/workspace, explain that limitation honestly. Check current official OpenAI guidance instead of promising a plan upgrade will solve it.
 6. Verify companion_status, then a small list_conversations query. Read messages only for the conversation and time range I request. Do not retrieve unrelated history merely to test setup.
 

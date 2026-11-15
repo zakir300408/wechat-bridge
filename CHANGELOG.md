@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-preview.2 — unreleased
+
+- Run in the system tray, with a connection page at setup and quiet startup afterward.
+- Start with Windows by default; keep the user's startup choice on updates.
+- Reuse one running instance, stop the owned reader on quit, and retry failed connections.
+- Add link and stop commands, shorter English docs, and Chinese setup guides.
+
 ## 0.6.0-preview.1 — unreleased
 
 - Clean public source tree, MIT license, user/assistant setup guides, contribution and privacy/security policies.

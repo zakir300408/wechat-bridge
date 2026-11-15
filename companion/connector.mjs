@@ -3,6 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import http from 'node:http';
+import { createInterface } from 'node:readline';
 import { spawn, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 export function gatewayUrl(value) {
@@ -221,7 +222,7 @@ export async function connect(gateway) {
     pathToFileURL(path.join(settings.weflowRoot, '..', 'ws', 'wrapper.mjs'))
   );
   const client = new Client(
-    { name: 'wechat-companion-connector', version: '0.6.0-preview.1' },
+    { name: 'wechat-companion-connector', version: '0.6.0-preview.2' },
     { capabilities: {} },
   );
   const transport = new StdioClientTransport({
@@ -264,17 +265,20 @@ export async function connect(gateway) {
   process.on('SIGINT', () => void stop());
   process.on('SIGTERM', () => void stop());
   let resetting = false;
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', (data) => {
+  const commands = createInterface({ input: process.stdin });
+  commands.on('line', (data) => {
     if (data.trim() === 'stop') void stop().then(() => process.exit(0));
+    else if (data.trim() === 'open-page')
+      void openPrivatePage(base + '/#key=' + encodeURIComponent(profile.viewerKey)).catch(() =>
+        console.error('Could not open the connection page. Try again from the tray menu.'),
+      );
     else if (data.trim() === 'reset-link' && !resetting) {
       resetting = true;
       void resetPrivateLink()
         .then(async () => {
           console.log('Private link reset. The previous link no longer works.');
-          console.log('Private MCP link: ' + privateUrl());
-          if (process.env.COMPANION_NO_BROWSER !== '1')
-            await openPrivatePage(base + '/#key=' + encodeURIComponent(profile.viewerKey));
+          if (process.env.COMPANION_QUIET !== '1') console.log('Private MCP link: ' + privateUrl());
+          await openPrivatePage(base + '/#key=' + encodeURIComponent(profile.viewerKey));
         })
         .catch(() => console.error('Link reset could not finish. Reconnect to retry safely.'))
         .finally(() => (resetting = false));
@@ -363,7 +367,7 @@ export async function connect(gateway) {
       retry = Math.min(retry * 2, 30000);
     });
   }
-  console.log('Private MCP link: ' + privateUrl());
+  if (process.env.COMPANION_QUIET !== '1') console.log('Private MCP link: ' + privateUrl());
   dial();
   if (process.env.COMPANION_NO_BROWSER !== '1')
     await openPrivatePage(base + '/#key=' + encodeURIComponent(profile.viewerKey));

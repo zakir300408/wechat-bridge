@@ -1,6 +1,6 @@
 $ErrorActionPreference='Stop'
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
-& $compiler /nologo /target:winexe ("/out:"+(Join-Path $PSScriptRoot 'Companion.exe')) /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.Security.dll (Join-Path $PSScriptRoot 'GatewayCompanion.cs')
+& $compiler /nologo /target:winexe ("/out:"+(Join-Path $PSScriptRoot 'Companion.exe')) /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.Security.dll /reference:Microsoft.CSharp.dll (Join-Path $PSScriptRoot 'GatewayCompanion.cs')
 if($LASTEXITCODE){throw 'Launcher compilation failed'}
 $meta=Get-Content (Join-Path $PSScriptRoot 'package.json') -Raw | ConvertFrom-Json
 $out=[IO.Path]::GetFullPath((Join-Path (Split-Path $PSScriptRoot) 'dist'))

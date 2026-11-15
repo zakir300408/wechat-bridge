@@ -29,7 +29,7 @@ if (command === 'doctor') {
 }
 if (['help', '--help', '-h'].includes(command)) {
   console.log(
-    'WeChat Bridge\n\n  setup             Install dependencies and open the companion\n  start             Open the installed companion\n  check             Verify local WeChat access\n  doctor            Show redacted installation diagnostics\n  connect [gateway] Connect this PC to a private Cloudflare gateway\n\nWindows source PC required. No OpenAI tunnel or Cloudflare account needed for users.',
+    'WeChat Bridge\n\n  setup             Install and open the connection page\n  start             Run quietly in the system tray\n  stop              Quit the bridge and stop reads\n  link              Open your connection page\n  check             Check local WeChat access\n  doctor            Show installation diagnostics\n  connect [gateway] Run the connector in this terminal\n\nRequires a Windows PC with local WeChat history.',
   );
   process.exit(0);
 }
@@ -48,13 +48,14 @@ if (command === 'setup') {
     console.error('Could not start the installer. Use an allowed Windows PowerShell environment.');
   process.exit(r.status ?? 1);
 }
-if (command === 'start') {
+if (['start', 'stop', 'link'].includes(command)) {
   const exe = path.join(dir, 'Companion.exe');
   if (!existsSync(exe)) {
     console.error('Run wechat-companion setup first.');
     process.exit(1);
   }
-  const p = spawn(exe, [], { detached: true, stdio: 'ignore', windowsHide: false });
+  const flag = { start: '--background', stop: '--quit', link: '--page' }[command];
+  const p = spawn(exe, [flag], { detached: true, stdio: 'ignore', windowsHide: true });
   p.on('error', () => {
     console.error('Could not open the companion.');
     process.exitCode = 1;

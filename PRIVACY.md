@@ -12,7 +12,7 @@ Requested contact, message, image and file results pass through the gateway to t
 
 The gateway persists hashed reader/agent credentials and device/authorization metadata, short-lived per-minute counters keyed by hashed network addresses, and a daily request counter. Hashing these addresses does not guarantee anonymity. It does not intentionally persist message bodies or file bytes. Application request logging is disabled because request paths contain credentials. The hosting provider may still process URLs and retain platform, security or billing metadata. Do not interpret disabled application logs as a promise that no provider ever retains metadata.
 
-The companion displays its private URL locally, including in an interactive terminal when started there. That is an intentional credential display; terminal capture, clipboard history, browser history, screenshots and chat-provider connector settings can expose it. The browser entry fragment is cleared after page load. Treat the copied link like a password.
+The connection page displays the private URL locally. The tray process does not print that URL; running the connector directly in a terminal does. That is an intentional credential display; terminal capture, clipboard history, browser history, screenshots and chat-provider connector settings can expose it. The browser entry fragment is cleared after page load. Treat the copied link like a password.
 
 ## Access and revocation
 

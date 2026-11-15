@@ -1,6 +1,6 @@
 {
   "name": "@zakir300408/wechat-companion",
-  "version": "0.6.0-preview.1",
+  "version": "0.6.0-preview.2",
   "private": false,
   "description": "One-command installer for the private Windows WeChat Companion preview",
   "bin": {
